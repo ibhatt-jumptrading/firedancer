@@ -326,6 +326,8 @@ typedef struct fd_bank_cost_tracker fd_bank_cost_tracker_t;
    (r) Field is owned by the replay tile, and should be updated only by
        the replay tile.
 */
+#define FD_BANKS_MAGIC       (0XF17EDA2C7EBA2450) /* FIREDANCER BANKS V0 */
+#define FD_BANKS_LOCKS_MAGIC (0XF17EDA2C7EBA2451) /* FIREDANCER BANKS LOCKS V0 */
 
 struct fd_bank {
 
@@ -401,8 +403,50 @@ struct fd_bank {
 };
 typedef struct fd_bank fd_bank_t;
 
+struct fd_banks_locks {
+  #define MAX_BANKS 1024UL
+
+  ulong       magic; /* ==FD_BANKS_LOCKS_MAGIC */
+
+  fd_rwlock_t banks_lock;
+  fd_rwlock_t epoch_rewards_pool_lock;
+  fd_rwlock_t epoch_leaders_pool_lock;
+  fd_rwlock_t vote_states_pool_lock;
+  fd_rwlock_t vote_states_prev_pool_lock;
+  fd_rwlock_t vote_states_prev_prev_pool_lock;
+  fd_rwlock_t cost_tracker_pool_lock;
+
+  /* Bank-specific locks.  Thhe index into the array lines up with the
+     bank index as assigned by fd_banks_t. */
+  ulong       banks_cnt;
+  fd_rwlock_t cost_tracker_locks[MAX_BANKS];
+  fd_rwlock_t stake_delegation_deltas_locks[MAX_BANKS];
+  fd_rwlock_t vote_states_locks[MAX_BANKS];
+  fd_rwlock_t vote_states_prev_locks[MAX_BANKS];
+  fd_rwlock_t vote_states_prev_prev_locks[MAX_BANKS];
+  fd_rwlock_t epoch_rewards_locks[MAX_BANKS];
+  fd_rwlock_t epoch_leaders_locks[MAX_BANKS];
+  fd_rwlock_t lthash_locks[MAX_BANKS];
+
+  #undef MAX_BANKS
+};
+typedef struct fd_banks_locks fd_banks_locks_t;
+
+struct fd_bank_l {
+  fd_banks_locks_t * locks;
+  fd_bank_t *        bank;
+};
+typedef struct fd_bank_l fd_bank_l_t;
+
+struct fd_banks_l {
+  fd_banks_locks_t * locks;
+  fd_banks_t *       banks;
+};
+typedef struct fd_banks_l fd_banks_l_t;
+
 static inline void
-fd_bank_set_epoch_rewards_pool( fd_bank_t * bank, fd_bank_epoch_rewards_t * epoch_rewards_pool ) {
+fd_bank_set_epoch_rewards_pool( fd_bank_t *               bank,
+                                fd_bank_epoch_rewards_t * epoch_rewards_pool ) {
   void * epoch_rewards_pool_mem = fd_bank_epoch_rewards_pool_leave( epoch_rewards_pool );
   if( FD_UNLIKELY( !epoch_rewards_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave epoch rewards pool" ));
@@ -416,7 +460,8 @@ fd_bank_get_epoch_rewards_pool( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_epoch_rewards_pool_lock( fd_bank_t * bank, fd_rwlock_t * rwlock ) {
+fd_bank_set_epoch_rewards_pool_lock( fd_bank_t *   bank,
+                                     fd_rwlock_t * rwlock ) {
   bank->epoch_rewards_pool_lock_offset = (ulong)rwlock - (ulong)bank;
 }
 
@@ -426,7 +471,8 @@ fd_bank_get_epoch_rewards_pool_lock( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_epoch_leaders_pool( fd_bank_t * bank, fd_bank_epoch_leaders_t * epoch_leaders_pool ) {
+fd_bank_set_epoch_leaders_pool( fd_bank_t *               bank,
+                                fd_bank_epoch_leaders_t * epoch_leaders_pool ) {
   void * epoch_leaders_pool_mem = fd_bank_epoch_leaders_pool_leave( epoch_leaders_pool );
   if( FD_UNLIKELY( !epoch_leaders_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave epoch leaders pool" ));
@@ -440,7 +486,8 @@ fd_bank_get_epoch_leaders_pool( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_epoch_leaders_pool_lock( fd_bank_t * bank, fd_rwlock_t * rwlock ) {
+fd_bank_set_epoch_leaders_pool_lock( fd_bank_t *   bank,
+                                     fd_rwlock_t * rwlock ) {
   bank->epoch_leaders_pool_lock_offset = (ulong)rwlock - (ulong)bank;
 }
 
@@ -450,7 +497,8 @@ fd_bank_get_epoch_leaders_pool_lock( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_pool( fd_bank_t * bank, fd_bank_vote_states_t * vote_states_pool ) {
+fd_bank_set_vote_states_pool( fd_bank_t *             bank,
+                              fd_bank_vote_states_t * vote_states_pool ) {
   void * vote_states_pool_mem = fd_bank_vote_states_pool_leave( vote_states_pool );
   if( FD_UNLIKELY( !vote_states_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states pool" ));
@@ -464,7 +512,8 @@ fd_bank_get_vote_states_pool( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_pool_lock( fd_bank_t * bank, fd_rwlock_t * rwlock ) {
+fd_bank_set_vote_states_pool_lock( fd_bank_t *   bank,
+                                   fd_rwlock_t * rwlock ) {
   bank->vote_states_pool_lock_offset = (ulong)rwlock - (ulong)bank;
 }
 
@@ -474,7 +523,8 @@ fd_bank_get_vote_states_pool_lock( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_prev_pool( fd_bank_t * bank, fd_bank_vote_states_prev_t * vote_states_prev_pool ) {
+fd_bank_set_vote_states_prev_pool( fd_bank_t *                  bank,
+                                   fd_bank_vote_states_prev_t * vote_states_prev_pool ) {
   void * vote_states_prev_pool_mem = fd_bank_vote_states_prev_pool_leave( vote_states_prev_pool );
   if( FD_UNLIKELY( !vote_states_prev_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states prev pool" ));
@@ -488,7 +538,8 @@ fd_bank_get_vote_states_prev_pool( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_prev_pool_lock( fd_bank_t * bank, fd_rwlock_t * rwlock ) {
+fd_bank_set_vote_states_prev_pool_lock( fd_bank_t *   bank,
+                                        fd_rwlock_t * rwlock ) {
   bank->vote_states_prev_pool_lock_offset = (ulong)rwlock - (ulong)bank;
 }
 
@@ -498,7 +549,8 @@ fd_bank_get_vote_states_prev_pool_lock( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_prev_prev_pool( fd_bank_t * bank, fd_bank_vote_states_prev_prev_t * vote_states_prev_prev_pool ) {
+fd_bank_set_vote_states_prev_prev_pool( fd_bank_t *                       bank,
+                                        fd_bank_vote_states_prev_prev_t * vote_states_prev_prev_pool ) {
   void * vote_states_prev_prev_pool_mem = fd_bank_vote_states_prev_prev_pool_leave( vote_states_prev_prev_pool );
   if( FD_UNLIKELY( !vote_states_prev_prev_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states prev prev pool" ));
@@ -512,7 +564,8 @@ fd_bank_get_vote_states_prev_prev_pool( fd_bank_t * bank ) {
 }
 
 static inline void
-fd_bank_set_vote_states_prev_prev_pool_lock( fd_bank_t * bank, fd_rwlock_t * rwlock ) {
+fd_bank_set_vote_states_prev_prev_pool_lock( fd_bank_t *   bank,
+                                             fd_rwlock_t * rwlock ) {
   bank->vote_states_prev_prev_pool_lock_offset = (ulong)rwlock - (ulong)bank;
 }
 
@@ -524,7 +577,8 @@ fd_bank_get_vote_states_prev_prev_pool_lock( fd_bank_t * bank ) {
 /* Do the same setup for the cost tracker pool. */
 
 static inline void
-fd_bank_set_cost_tracker_pool( fd_bank_t * bank, fd_bank_cost_tracker_t * cost_tracker_pool ) {
+fd_bank_set_cost_tracker_pool( fd_bank_t *              bank,
+                               fd_bank_cost_tracker_t * cost_tracker_pool ) {
   void * cost_tracker_pool_mem = fd_bank_cost_tracker_pool_leave( cost_tracker_pool );
   if( FD_UNLIKELY( !cost_tracker_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave cost tracker pool" ));
@@ -1062,6 +1116,28 @@ fd_banks_new_bank( fd_banks_t * banks,
 static inline int
 fd_banks_is_full( fd_banks_t * banks ) {
   return fd_banks_pool_free( fd_banks_get_bank_pool( banks ) )==0UL;
+}
+
+static inline fd_banks_l_t *
+fd_banks_l_init( fd_banks_l_t *     banks_l_join,
+                 fd_banks_t *       banks,
+                 fd_banks_locks_t * locks ) {
+  banks_l_join->locks = locks;
+  banks_l_join->banks = banks;
+  return banks_l_join;
+}
+
+static inline fd_bank_l_t *
+fd_bank_l_init( fd_bank_l_t *  bank_l_join,
+                fd_banks_l_t * banks,
+                ulong          bank_idx ) {
+  fd_bank_t * bank = fd_banks_bank_query( banks->banks, bank_idx );
+  if( FD_UNLIKELY( !bank ) ) {
+    FD_LOG_CRIT(( "Failed to get bank" ));
+  }
+  bank_l_join->locks = banks->locks;
+  bank_l_join->bank = bank;
+  return bank_l_join;
 }
 
 FD_PROTOTYPES_END
