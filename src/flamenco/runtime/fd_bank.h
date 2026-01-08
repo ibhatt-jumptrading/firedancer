@@ -753,7 +753,8 @@ fd_banks_get_epoch_rewards_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_epoch_rewards_pool( fd_banks_data_t * banks_data, fd_bank_epoch_rewards_t * epoch_rewards_pool ) {
+fd_banks_set_epoch_rewards_pool( fd_banks_data_t *         banks_data,
+                                 fd_bank_epoch_rewards_t * epoch_rewards_pool ) {
   void * epoch_rewards_pool_mem = fd_bank_epoch_rewards_pool_leave( epoch_rewards_pool );
   if( FD_UNLIKELY( !epoch_rewards_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave epoch rewards pool" ));
@@ -767,7 +768,8 @@ fd_banks_get_epoch_leaders_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_epoch_leaders_pool( fd_banks_data_t * banks_data, fd_bank_epoch_leaders_t * epoch_leaders_pool ) {
+fd_banks_set_epoch_leaders_pool( fd_banks_data_t *         banks_data,
+                                 fd_bank_epoch_leaders_t * epoch_leaders_pool ) {
   void * epoch_leaders_pool_mem = fd_bank_epoch_leaders_pool_leave( epoch_leaders_pool );
   if( FD_UNLIKELY( !epoch_leaders_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave epoch leaders pool" ));
@@ -781,7 +783,8 @@ fd_banks_get_vote_states_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_vote_states_pool( fd_banks_data_t * banks_data, fd_bank_vote_states_t * vote_states_pool ) {
+fd_banks_set_vote_states_pool( fd_banks_data_t *       banks_data,
+                               fd_bank_vote_states_t * vote_states_pool ) {
   void * vote_states_pool_mem = fd_bank_vote_states_pool_leave( vote_states_pool );
   if( FD_UNLIKELY( !vote_states_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states pool" ));
@@ -795,7 +798,8 @@ fd_banks_get_vote_states_prev_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_vote_states_prev_pool( fd_banks_data_t * banks_data, fd_bank_vote_states_prev_t * vote_states_prev_pool ) {
+fd_banks_set_vote_states_prev_pool( fd_banks_data_t *            banks_data,
+                                    fd_bank_vote_states_prev_t * vote_states_prev_pool ) {
   void * vote_states_prev_pool_mem = fd_bank_vote_states_prev_pool_leave( vote_states_prev_pool );
   if( FD_UNLIKELY( !vote_states_prev_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states prev pool" ));
@@ -809,7 +813,8 @@ fd_banks_get_vote_states_prev_prev_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_vote_states_prev_prev_pool( fd_banks_data_t * banks_data, fd_bank_vote_states_prev_prev_t * vote_states_prev_prev_pool ) {
+fd_banks_set_vote_states_prev_prev_pool( fd_banks_data_t *                 banks_data,
+                                         fd_bank_vote_states_prev_prev_t * vote_states_prev_prev_pool ) {
   void * vote_states_prev_prev_pool_mem = fd_bank_vote_states_prev_prev_pool_leave( vote_states_prev_prev_pool );
   if( FD_UNLIKELY( !vote_states_prev_prev_pool_mem ) ) {
     FD_LOG_CRIT(( "Failed to leave vote states prev prev pool" ));
@@ -823,7 +828,7 @@ fd_banks_get_cost_tracker_pool( fd_banks_data_t * banks_data ) {
 }
 
 static inline void
-fd_banks_set_cost_tracker_pool( fd_banks_data_t * banks_data,
+fd_banks_set_cost_tracker_pool( fd_banks_data_t *        banks_data,
                                 fd_bank_cost_tracker_t * cost_tracker_pool ) {
   void * cost_tracker_pool_mem = fd_bank_cost_tracker_pool_leave( cost_tracker_pool );
   if( FD_UNLIKELY( !cost_tracker_pool_mem ) ) {

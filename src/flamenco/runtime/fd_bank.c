@@ -915,7 +915,8 @@ fd_bank_stake_delegation_apply_deltas( fd_banks_t *             banks,
 }
 
 fd_stake_delegations_t *
-fd_bank_stake_delegations_frontier_query( fd_banks_t * banks, fd_bank_t * bank ) {
+fd_bank_stake_delegations_frontier_query( fd_banks_t * banks,
+                                          fd_bank_t *  bank ) {
 
   fd_rwlock_write( &banks->locks->banks_lock );
 
